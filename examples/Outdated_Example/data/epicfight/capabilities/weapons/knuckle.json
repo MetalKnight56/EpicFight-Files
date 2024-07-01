@@ -1,0 +1,11 @@
+{
+	"attributes":
+	{
+		"common":
+		{
+			"impact":0.0,
+			"max_strikes":4
+		}
+	},
+	"type":"fist"
+}
