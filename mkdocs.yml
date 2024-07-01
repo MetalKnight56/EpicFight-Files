@@ -44,9 +44,6 @@ theme:
   icon:
     logo: logo
 
-# Plugins
-plugins:
-
 # Hooks
 hooks:
   - hooks/archive.py
@@ -60,9 +57,6 @@ validation:
     not_found: warn
     absolute_links: warn
     unrecognized_links: warn
-
-# Customization
-extra:
 
 # Extensions
 markdown_extensions:
