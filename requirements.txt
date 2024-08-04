@@ -23,7 +23,7 @@ mergedeep
 mkdocs-material
 cairosvg
 pillow
-flask
+pathspec
 
 # Requirements for integrations
 mkdocs-git-committers-plugin-2
