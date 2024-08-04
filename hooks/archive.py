@@ -1,85 +1,57 @@
-# Copyright (c) 2016-2023 Martin Donath <martin.donath@squidfunk.com>
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to
-# deal in the Software without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-# sell copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
-
 import logging
 import os
-
+from flask import Flask, send_file, abort
 from glob import iglob
-from mkdocs.config.defaults import MkDocsConfig
-from pathspec.gitignore import GitIgnoreSpec
+from pathspec import PathSpec
+from pathspec.patterns import GitWildMatchPattern
 from zipfile import ZipFile, ZIP_DEFLATED
+import tempfile
 
-# -----------------------------------------------------------------------------
-# State
-# -----------------------------------------------------------------------------
-
-# Initialize incremental builds
-is_serve = False
-
-# -----------------------------------------------------------------------------
-# Hooks
-# -----------------------------------------------------------------------------
-
-# Determine whether we're serving the site
-def on_startup(command, dirty):
-    global is_serve
-    is_serve = command == "serve"
-
-# Create archives for all examples
-def on_post_build(config: MkDocsConfig):
-    if is_serve:
-        return
-
-    # Read files to ignore from .gitignore
-    with open(".gitignore") as f:
-        spec = GitIgnoreSpec.from_lines([
-            line for line in f.read().split("\n")
-                if line and not line.startswith("#")
-        ])
-
-    # Create archives for each example
-    for file in iglob("examples/*/mkdocs.yml", recursive = True):
-        base = os.path.dirname(file)
-
-        # Compute archive name and path
-        example = os.path.basename(base)
-        archive = os.path.join(config.site_dir, f"{example}.zip")
-
-        # Start archive creation
-        log.info(f"Creating archive '{example}.zip'")
-        with ZipFile(archive, "w", ZIP_DEFLATED, False) as f:
-            for name in spec.match_files(os.listdir(base), negate = True):
-                path = os.path.join(base, name)
-                if os.path.isdir(path):
-                    path = os.path.join(path, "**")
-
-                # Find all files recursively and add them to the archive
-                for file in iglob(path, recursive = True, include_hidden = True):
-                    log.debug(f"+ '{file}'")
-                    f.write(file, os.path.join(
-                        example, os.path.relpath(file, base)
-                    ))
+app = Flask(__name__)
 
 # -----------------------------------------------------------------------------
 # Data
 # -----------------------------------------------------------------------------
 
 # Set up logging
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("mkdocs.material.examples")
+
+def create_zip_folder(folder_path, zip_path):
+    # Read files to ignore from .gitignore
+    gitignore_path = os.path.join(folder_path, ".gitignore")
+    if os.path.exists(gitignore_path):
+        with open(gitignore_path) as f:
+            lines = f.read().splitlines()
+            lines = [line for line in lines if line and not line.startswith("#")]
+            spec = PathSpec.from_lines(GitWildMatchPattern, lines)
+    else:
+        spec = PathSpec([])
+
+    # Create the archive
+    log.info(f"Creating archive '{zip_path}'")
+    with ZipFile(zip_path, "w", ZIP_DEFLATED, False) as f:
+        for root, _, files in os.walk(folder_path):
+            for file in files:
+                path = os.path.join(root, file)
+                if not spec.match_file(path):
+                    arcname = os.path.relpath(path, folder_path)
+                    log.debug(f"+ '{path}' as '{arcname}'")
+                    f.write(path, arcname)
+
+@app.route('/<path:folder>.zip')
+def zip_and_download(folder):
+    base_dir = "examples"
+    folder_path = os.path.join(base_dir, folder)
+    
+    if not os.path.isdir(folder_path):
+        abort(404, description="Folder not found")
+    
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, f"{os.path.basename(folder)}.zip")
+    create_zip_folder(folder_path, zip_path)
+    
+    return send_file(zip_path, as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
