@@ -28,7 +28,6 @@ pathspec
 # Requirements for integrations
 mkdocs-git-committers-plugin-2
 mkdocs-git-revision-date-localized-plugin
-mkdocs-copy
 mkdocs-glightbox
 mkdocs-minify-plugin
 mkdocs-redirects
