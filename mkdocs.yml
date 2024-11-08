@@ -41,9 +41,9 @@ theme:
     logo: logo
 
 plugins:
-  - mkdocs-simple-hooks:
-      hooks:
-        on_post_build: "docs.hooks:copy_get"
+  - mkdocs-copy:
+      add_per_path:
+        - examples
 
 hooks:
   - hooks/archive.py
