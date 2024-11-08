@@ -18,7 +18,6 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-# Project information
 site_name: Material for MkDocs
 site_url: https://mkdocs-material.github.io/examples/
 site_author: Martin Donath
@@ -26,14 +25,11 @@ site_description: >-
   An ever-growing collection of self-contained example uses of Material for
   MkDocs that you can download and run to get started quickly
 
-# Repository
 repo_name: mkdocs-material/examples
 repo_url: https://github.com/mkdocs-material/examples
 
-# Copyright
 copyright: Copyright &copy; 2016 - 2023 Martin Donath
 
-# Theme
 theme:
   name: material
   features:
@@ -44,7 +40,6 @@ theme:
   icon:
     logo: logo
 
-# Hooks
 hooks:
   - hooks/archive.py
 
@@ -58,7 +53,6 @@ validation:
     absolute_links: warn
     unrecognized_links: warn
 
-# Extensions
 markdown_extensions:
   - admonition
   - attr_list
