@@ -22,7 +22,7 @@ name: documentation
 on:
   push:
     branches:
-      - Wiki-Examples
+      - main
 
 env:
   CONCURRENCY: 1
