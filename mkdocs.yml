@@ -40,11 +40,6 @@ theme:
   icon:
     logo: logo
 
-plugins:
-  - mkdocs-copy:
-      add_per_path:
-        - examples
-
 hooks:
   - hooks/archive.py
 
