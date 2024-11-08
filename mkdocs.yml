@@ -40,6 +40,11 @@ theme:
   icon:
     logo: logo
 
+plugins:
+  - mkdocs-simple-hooks:
+      hooks:
+        on_post_build: "docs.hooks:copy_get"
+
 hooks:
   - hooks/archive.py
 
