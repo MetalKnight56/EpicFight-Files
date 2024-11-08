@@ -45,8 +45,8 @@ theme:
     logo: logo
 
 # Hooks
-plugins:
-  - zip_examples
+hooks:
+  - hooks/archive.py
 
 validation:
   nav:
