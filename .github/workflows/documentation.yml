@@ -62,8 +62,14 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get install pngquant
 
+      - name: Create 'examples' directory in 'site' if it doesn't exist
+        run: |
+          if [ ! -d "site/examples" ]; then
+            mkdir -p site/examples
+          fi
+
       - name: Copy examples to the site directory
-        run: cp -r examples site/examples
+        run: cp -r EpicFight-Files/examples/* site/examples/
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt
